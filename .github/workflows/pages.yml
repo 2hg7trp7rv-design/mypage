@@ -1,0 +1,33 @@
+# GitHub Pages への公開（ブランチからの公開は1時間10回までなので、Actions で公開する）
+# 2026-11-24: 上げた直後だと公開の手順が上げた物を見つけられず失敗することがあったので、2つの仕事に分けて少し待つ
+name: deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: sleep 10
+      - id: deployment
+        uses: actions/deploy-pages@v4
